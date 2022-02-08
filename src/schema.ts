@@ -8,6 +8,12 @@ interface Contact {
     last_name: string
 }
 
+interface UserDataSource {
+    dataSources: {
+        userAPI: UserAPI
+    }
+}
+
 const contacts: Contact[] = [
     {
         id: '1',
@@ -58,44 +64,49 @@ const resolvers = {
         contacts: async (
             _: undefined,
             __: undefined,
-            {
-                dataSources,
-            }: {
-                dataSources: {
-                    userAPI: UserAPI
-                }
-            }
+            { dataSources }: UserDataSource
         ) => {
             const result = await dataSources.userAPI.findAll()
             console.log(result)
             return result
         },
-        contact(parent: undefined, args: Contact) {
-            return find(contacts, { id: args.id })
+        contact: async (
+            parent: undefined,
+            args: Contact,
+            { dataSources }: UserDataSource
+        ) => {
+            return await dataSources.userAPI.findById(args.id)
         },
     },
     Mutation: {
-        addContact(parent: undefined, args: Contact) {
-            const newContact = {
-                id: args.id,
-                first_name: args.first_name,
-                last_name: args.last_name,
-            }
-            contacts.push(newContact)
-
-            return newContact
+        addContact: async (
+            parent: undefined,
+            args: Contact,
+            { dataSources }: UserDataSource
+        ) => {
+            return await dataSources.userAPI.insertContact(
+                args.id,
+                args.first_name,
+                args.last_name
+            )
         },
-        updateContact(parent: undefined, args: Contact) {
-            const contact = find(contacts, { id: args.id })
-
-            if (!contact) {
-                throw new Error(`Contact with id ${args.id} not found`)
-            }
-
-            contact.first_name = args.first_name
-            contact.last_name = args.last_name
-
-            return contact
+        updateContact: async (
+            parent: undefined,
+            args: Contact,
+            { dataSources }: UserDataSource
+        ) => {
+            return await dataSources.userAPI.updateContact(
+                args.id,
+                args.first_name,
+                args.last_name
+            )
+            // const contact = find(contacts, { id: args.id })
+            // if (!contact) {
+            //     throw new Error(`Contact with id ${args.id} not found`)
+            // }
+            // contact.first_name = args.first_name
+            // contact.last_name = args.last_name
+            // return contact
         },
         removeContact(parent: undefined, args: Contact) {
             const removedContact = find(contacts, { id: args.id })

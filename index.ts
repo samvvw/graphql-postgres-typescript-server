@@ -26,8 +26,8 @@ const startApolloServer = async (
         plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
     })
 
-    const { rows } = await db.query(`SELECT * from mytable;`, [])
-    console.log(rows)
+    // const { rows } = await db.query(`SELECT * from mytable;`, [])
+    // console.log(rows)
     await server.start()
 
     server.applyMiddleware({ app })
