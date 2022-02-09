@@ -9,6 +9,11 @@ import { TypeSource, IResolvers } from '@graphql-tools/utils'
 import { typeDefs, resolvers } from './src/schema'
 import UserAPI from './src/user'
 
+const CURRENT_USER = {
+    id: 12,
+    userName: 'Sam',
+}
+
 const startApolloServer = async (
     typeDefs: TypeSource,
     resolvers: IResolvers
@@ -23,6 +28,13 @@ const startApolloServer = async (
         dataSources: () => ({
             userAPI: new UserAPI({ db }),
         }),
+        context: ({ req }) => {
+            if (req.headers.authorization === '123456') {
+                return { user: CURRENT_USER }
+            } else {
+                return null
+            }
+        },
         plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
     })
 

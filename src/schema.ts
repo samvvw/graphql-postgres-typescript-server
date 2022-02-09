@@ -2,6 +2,10 @@ import { gql } from 'apollo-server'
 import { find, remove } from 'lodash'
 import UserAPI from './user'
 
+interface User {
+    id: number
+    userName: string
+}
 interface Contact {
     id: string
     first_name: string
@@ -12,6 +16,7 @@ interface UserDataSource {
     dataSources: {
         userAPI: UserAPI
     }
+    user: User | null
 }
 
 const contacts: Contact[] = [
@@ -64,42 +69,54 @@ const resolvers = {
         contacts: async (
             _: undefined,
             __: undefined,
-            { dataSources }: UserDataSource
+            { dataSources, user }: UserDataSource
         ) => {
-            const result = await dataSources.userAPI.findAll()
-            console.log(result)
-            return result
+            if (user) {
+                const result = await dataSources.userAPI.findAll()
+                console.log(result)
+                return result
+            }
+            return null
         },
         contact: async (
             parent: undefined,
             args: Contact,
-            { dataSources }: UserDataSource
+            { dataSources, user }: UserDataSource
         ) => {
-            return await dataSources.userAPI.findById(args.id)
+            if (user) {
+                return await dataSources.userAPI.findById(args.id)
+            }
+            return null
         },
     },
     Mutation: {
         addContact: async (
             parent: undefined,
             args: Contact,
-            { dataSources }: UserDataSource
+            { dataSources, user }: UserDataSource
         ) => {
-            return await dataSources.userAPI.insertContact(
-                args.id,
-                args.first_name,
-                args.last_name
-            )
+            if (user) {
+                return await dataSources.userAPI.insertContact(
+                    args.id,
+                    args.first_name,
+                    args.last_name
+                )
+            }
+            return null
         },
         updateContact: async (
             parent: undefined,
             args: Contact,
-            { dataSources }: UserDataSource
+            { dataSources, user }: UserDataSource
         ) => {
-            return await dataSources.userAPI.updateContact(
-                args.id,
-                args.first_name,
-                args.last_name
-            )
+            if (user) {
+                return await dataSources.userAPI.updateContact(
+                    args.id,
+                    args.first_name,
+                    args.last_name
+                )
+            }
+            return null
             // const contact = find(contacts, { id: args.id })
             // if (!contact) {
             //     throw new Error(`Contact with id ${args.id} not found`)
@@ -108,17 +125,23 @@ const resolvers = {
             // contact.last_name = args.last_name
             // return contact
         },
-        removeContact(parent: undefined, args: Contact) {
-            const removedContact = find(contacts, { id: args.id })
-            if (!removedContact) {
-                throw new Error(`Contact with id ${args.id} not found`)
+        removeContact: async (
+            parent: undefined,
+            args: Contact,
+            { dataSources, user }: UserDataSource
+        ) => {
+            if (user) {
+                return await dataSources.userAPI.deleteContact(args.id)
             }
-
-            remove(contacts, (c) => {
-                return c.id === removedContact.id
-            })
-
-            return removedContact
+            return null
+            // const removedContact = find(contacts, { id: args.id })
+            // if (!removedContact) {
+            //     throw new Error(`Contact with id ${args.id} not found`)
+            // }
+            // remove(contacts, (c) => {
+            //     return c.id === removedContact.id
+            // })
+            // return removedContact
         },
     },
 }

@@ -78,6 +78,20 @@ class UserAPI extends DataSource {
 
         // Delete contact method
     }
+    async deleteContact(id: string) {
+        try {
+            const result = await this.db.query(
+                'DELETE FROM mytable WHERE id=$1',
+                [id]
+            )
+            console.log(result)
+
+            return result
+        } catch (error) {
+            console.log(error)
+            return error
+        }
+    }
 }
 
 export default UserAPI
