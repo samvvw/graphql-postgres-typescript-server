@@ -84,7 +84,6 @@ class UserAPI extends DataSource {
                 'DELETE FROM mytable WHERE id=$1',
                 [id]
             )
-            console.log(result)
 
             return result
         } catch (error) {

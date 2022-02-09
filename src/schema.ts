@@ -1,5 +1,4 @@
 import { gql } from 'apollo-server'
-import { find, remove } from 'lodash'
 import UserAPI from './user'
 
 interface User {
@@ -18,24 +17,6 @@ interface UserDataSource {
     }
     user: User | null
 }
-
-const contacts: Contact[] = [
-    {
-        id: '1',
-        first_name: 'Paul',
-        last_name: 'Lam',
-    },
-    {
-        id: '2',
-        first_name: 'John',
-        last_name: 'Smith',
-    },
-    {
-        id: '3',
-        first_name: 'Jane',
-        last_name: 'Doe',
-    },
-]
 
 const typeDefs = gql`
     type Contact {
@@ -73,7 +54,6 @@ const resolvers = {
         ) => {
             if (user) {
                 const result = await dataSources.userAPI.findAll()
-                console.log(result)
                 return result
             }
             return null
@@ -117,13 +97,6 @@ const resolvers = {
                 )
             }
             return null
-            // const contact = find(contacts, { id: args.id })
-            // if (!contact) {
-            //     throw new Error(`Contact with id ${args.id} not found`)
-            // }
-            // contact.first_name = args.first_name
-            // contact.last_name = args.last_name
-            // return contact
         },
         removeContact: async (
             parent: undefined,
@@ -134,14 +107,6 @@ const resolvers = {
                 return await dataSources.userAPI.deleteContact(args.id)
             }
             return null
-            // const removedContact = find(contacts, { id: args.id })
-            // if (!removedContact) {
-            //     throw new Error(`Contact with id ${args.id} not found`)
-            // }
-            // remove(contacts, (c) => {
-            //     return c.id === removedContact.id
-            // })
-            // return removedContact
         },
     },
 }
